@@ -1,0 +1,100 @@
+---
+title: "Temperature"
+output:
+  html_document:
+    fig_width: 8
+    fig_caption: yes
+    toc: yes
+    number_sections: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+For climate data, temperature and rainfall was gathered from the Australian Bureau of Meterology (BoM). A number of weather stations were chosen, based on their proximity to major Australian cities such as Sydney, Perth, Brisbane, Canberra, and Adelaide. The South East region of Australia appears to be the most affected.
+  
+The report will explore the annual temperature changes in BRISBANE Australia in 2018.
+
+```{r prompt=TRUE, comment=''}
+suppressMessages(library(tidyverse))
+suppressMessages(library(forcats))
+temperature <- read.csv('data/temperature.csv', header = T)
+pander::pander(head(temperature, 6))
+```
+
+
+```{r prompt=TRUE, comment=''}
+temperature <- temperature %>% 
+  mutate(year = str_sub(date, start = 1, end = 4)) %>% 
+  mutate_at(.vars = 'date', as.Date) %>% 
+  as_tibble()
+```
+
+
+```{r prompt=TRUE, comment=''}
+temperature_2018 <- temperature%>% 
+  filter(city_name == 'BRISBANE') %>% 
+  filter(year == "2018")
+pander::pander(head(temperature_2018, 6))
+```
+
+
+```{r prompt=TRUE, comment=''}
+pander::pander(with(temperature_2018, table(city_name, temp_type)))
+```
+
+
+```{r prompt=TRUE, comment=''}
+pander::pander(with(temperature_2018, table(city_name, site_name)))
+```
+
+
+```{r prompt=TRUE, comment=''}
+temperature_2018 %>% 
+ggplot(aes(x = date, y = temperature, 
+             color = temp_type, 
+             linetype = temp_type,
+             group = temp_type)) +
+  geom_line() +
+  geom_point() +
+  theme_classic() +
+  labs(x = 'Date', y = 'Temperature',
+       color = 'Type',
+       linetype = 'Type') +
+  scale_y_continuous(breaks = seq(0, 40, 4),
+                     limits = c(0, 40))
+  
+```
+
+ <center>Figure 1 Temperature variation in BRISBANE, Australia, 2018</center>
+
+```{r prompt=TRUE, comment=''}
+temperature_2018 %>% 
+  ggplot(aes(x = temp_type, y = temperature, 
+             color = temp_type, 
+             fill = temp_type)) +
+  geom_boxplot() +
+  geom_jitter() +
+  theme_bw() +
+  scale_fill_brewer(palette = 'Set1') + 
+  scale_color_brewer(palette = 'Set1')  + 
+  labs(x = 'Temperature Type', y = 'Temperature',
+       caption = 'The data was downloaded from GitHub-TidyTuesday') + 
+  guides(fill = F, color = F) +
+  theme(plot.caption = element_text(color = "red", 
+                                    face = "italic",
+                                    hjust = 0))
+```
+ <center>Figure 2 Temperature in BRISBANE, Australia, 2018</center>
+
+
+# Conclusion
+As shown in Table 1, Brisbane has the highest and lowest temperature records for 365 days. Table 2 shows that Brisbane has only one temperature monitoring station, called Brisbane AERO
+  
+As can be seen from Figure 1 and Figure 2, BRISBANE is in the southern hemisphere, and the annual temperature distribution is V-shaped, with the highest temperature of 38.1 ℃ and the lowest temperature of 3.3 ℃.
+  
+Brisbane is affected by the continental climate, and the annual temperature changes greatly.
